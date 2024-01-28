@@ -23,7 +23,7 @@ const putDb = async (content) => {
     const transaction = jateDB.transaction('jate', 'readwrite');
     const objectStore = transaction.objectStore('jate');
     // pass in the content
-    const request = objectStore.add({ value: content });
+    const request = objectStore.add({ id: 1, value: content });
     // confirmation
     const result = await request;
     console.log('🚀 - Data added to the database', result);
@@ -40,11 +40,11 @@ const getDb = async () => {
   try {
     // creating connection
     const jateDB = await openDB('jate', 1);
-    // specify the database and privileges
+    // specify the database
     const transaction = jateDB.transaction('jate', 'readonly');
     const objectStore = transaction.objectStore('jate');
     // get all data in the database
-    const request = objectStore.getAll();
+    const request = objectStore.get(1);
     // confirmation
     const result = await request;
     console.log('All content retrieved from the database:', result);
@@ -54,5 +54,7 @@ const getDb = async () => {
     return null;
   }
 };
+
+
 
 initdb();
