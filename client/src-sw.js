@@ -19,22 +19,26 @@ const pageCache = new CacheFirst({
   ],
 });
 
-warmStrategyCache({
-  urls: ['/index.html', '/'],
-  strategy: pageCache,
-});
-
-registerRoute(({ request }) => request.mode === 'navigate', pageCache);
-
-
 // custom asset caching
 registerRoute(
   // defining the callback function to filter requests for caching
-  ({ request }) => ['custom-style', 'custom-script', 'custom-worker'].includes(request.destination),
+  ({ request }) => ['style', 'script', 'worker'].includes(request.destination),
   new StaleWhileRevalidate({
-    cacheName: 'custom-asset-cache',
+    cacheName: 'asset-cache',
     plugins: [
       // caching up to a max of 30 days
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+  })
+);
+
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'image-cache',
+    plugins: [
       new CacheableResponsePlugin({
         statuses: [0, 200],
       }),
@@ -43,5 +47,14 @@ registerRoute(
         maxAgeSeconds: 30 * 24 * 60 * 60,
       }),
     ],
-  })
+  }),
 );
+
+
+warmStrategyCache({
+  urls: ['/index.html', '/'],
+  strategy: pageCache,
+});
+
+// TODO: Implement asset caching
+registerRoute(({ request }) => request.mode === 'navigate', pageCache);
